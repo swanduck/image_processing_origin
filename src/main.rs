@@ -3,6 +3,7 @@ use image::{GenericImageView, DynamicImage, ImageBuffer, Rgba};
 
 type Image = ImageBuffer<Rgba<u8>, Vec<u8>>;
 
+#[allow(dead_code)]
 fn resize(img: &Image, new_dims: (u32, u32)) -> Image {
     let (old_width, old_height) = img.dimensions();
     let (new_width, new_height) = new_dims;
@@ -23,6 +24,7 @@ fn resize(img: &Image, new_dims: (u32, u32)) -> Image {
     resized
 }
 
+#[allow(dead_code)]
 fn pixelate(img: &DynamicImage, new_dims: (u32, u32)) -> Image {
     let old_dims = img.dimensions();
 
@@ -37,12 +39,67 @@ fn pixelate(img: &DynamicImage, new_dims: (u32, u32)) -> Image {
 
 }
 
+fn blur(img: &DynamicImage, par: i32) -> Image {
+    let (width, height) = img.dimensions();
+    let mut output_img = ImageBuffer::new(width, height);
+
+    let bound: i32;
+    let squared: u32;
+    if par % 2 == 0 {
+        bound = par/2;
+        squared = ((par+1) * (par+1)) as u32;
+    }
+    else {
+        bound = (par-1)/2;
+        squared = (par * par) as u32;
+    }
+    let (lower_bound, upper_bound) = (bound * -1, bound);
+
+    println!("{lower_bound}, {upper_bound}, {squared}");
+
+    for y in 0..height {
+        for x in 0..width {
+            let mut r = 0u32;
+            let mut g = 0u32;
+            let mut b = 0u32;
+            let mut a = 0u32;
+
+            for dy in lower_bound..=upper_bound {
+                for dx in lower_bound..=upper_bound {
+                    let nx = x as i32 + dx;
+                    let ny = y as i32 + dy;
+                    if nx >= 0 && nx < width as i32 && ny >= 0 && ny < height as i32 {
+                        let pixel = img.get_pixel(nx as u32, ny as u32);
+                        r += pixel[0] as u32;
+                        g += pixel[1] as u32;
+                        b += pixel[2] as u32;
+                        a += pixel[3] as u32;
+                    }
+                }
+            }
+
+            let pixel = Rgba([
+                (r / squared) as u8,
+                (g / squared) as u8,
+                (b / squared) as u8,
+                (a / squared) as u8,
+            ]);
+
+            output_img.put_pixel(x, y, pixel);
+        }
+    }
+
+    output_img
+}
+
+
 
 fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let img = ImageReader::open("pug.png")?.decode()?;
-    let img_ = pixelate(&img, (20, 20));
+    // let img_ = pixelate(&img, (20, 20));
+    // let _ = img_.save("pixelated.png");
 
-    let _ = img_.save("pixelated.png");
-
+    let img_ = blur(&img, 9);
+    let _ = img_.save("blurred.png");
     Ok(())
 }
