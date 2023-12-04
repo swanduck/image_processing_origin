@@ -154,6 +154,66 @@ fn par_blur(img: &DynamicImage, par: i32) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
     output_img_buffer
 }
 
+fn par_blur2(img: &DynamicImage, par: i32) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
+    let (width, height) = img.dimensions();
+    
+    let bound: i32;
+    let squared: u32;
+    if par % 2 == 0 {
+        bound = par/2;
+        squared = ((par+1) * (par+1)) as u32;
+    }
+    else {
+        bound = (par-1)/2;
+        squared = (par * par) as u32;
+    }
+    let (lower_bound, upper_bound) = (bound * -1, bound);
+
+    // Initialize the array with the values of dx and dy
+    let offsets: Vec<(i32, i32)> = (lower_bound..=upper_bound)
+        .flat_map(|dx| (lower_bound..=upper_bound).map(move |dy| (dx, dy)))
+        .collect();
+
+    let output_img: Vec<_> = (0..height).into_par_iter().map(|y| {
+        let mut row = vec![Rgba([0, 0, 0, 0]); width as usize];
+        for x in 0..width {
+            let mut r = 0u32;
+            let mut g = 0u32;
+            let mut b = 0u32;
+            let mut a = 0u32;
+
+            for &(dx, dy) in &offsets {
+                let nx = x as i32 + dx;
+                let ny = y as i32 + dy;
+                if nx >= 0 && nx < width as i32 && ny >= 0 && ny < height as i32 {
+                    let pixel = img.get_pixel(nx as u32, ny as u32);
+                    r += pixel[0] as u32;
+                    g += pixel[1] as u32;
+                    b += pixel[2] as u32;
+                    a += pixel[3] as u32;
+                }
+            }
+
+            row[x as usize] = Rgba([
+                (r / squared) as u8,
+                (g / squared) as u8,
+                (b / squared) as u8,
+                (a / squared) as u8,
+            ]);
+        }
+        row
+    }).collect();
+
+    let mut output_img_buffer = ImageBuffer::new(width, height);
+    for (y, row) in output_img.iter().enumerate() {
+        for (x, &pixel) in row.iter().enumerate() {
+            output_img_buffer.put_pixel(x as u32, y as u32, pixel);
+        }
+    }
+
+    output_img_buffer
+}
+
 
 
 
@@ -163,11 +223,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     // let img_ = pixelate(&img, (20, 20));
     // let _ = img_.save("images/pixel/pixelated.png");
 
-
+    let blur_param = 100;
     use std::time::Instant;
     let now = Instant::now();
     {
-        let img_ = blur(&img, 40);
+        let img_ = blur(&img, blur_param);
         let _ = img_.save("images/blur/blurred.png");    
     }
     let elapsed = now.elapsed();
@@ -175,20 +235,33 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
 
     let now2 = Instant::now();
     {
-        let img_ = par_blur(&img, 40);
+        let img_ = par_blur(&img, blur_param);
         // let _ = img_.save("images/blur/par_blurred.png");    
         match img_.save("images/blur/par_blurred.png") {
             Ok(_) => println!("Image saved successfully."),
             Err(e) => println!("Failed to save image: {}", e),
         }
-        
     }
     let elapsed2 = now2.elapsed();
+
+
+    let now3 = Instant::now();
+    {
+        let img_ = par_blur2(&img, blur_param);
+        match img_.save("images/blur/par_blurred2.png") {
+            Ok(_) => println!("Image saved successfully."),
+            Err(e) => println!("Failed to save image: {}", e),
+        }
+    }
+    let elapsed3 = now3.elapsed();
     println!("seq: {:.2?}", elapsed);
     println!("par: {:.2?}", elapsed2);
+    println!("par2: {:.2?}", elapsed3);
     
     let speedup = elapsed.as_secs_f64() / elapsed2.as_secs_f64();
-    println!("The parallel version is {:.2} times faster than the sequential version.", speedup);
+    let speedup2 = elapsed.as_secs_f64() / elapsed3.as_secs_f64();
+    println!("par is {:.2} times faster than the sequential version.", speedup);
+    println!("par2 is {:.2} times faster than the sequential version.", speedup2);
 
     Ok(())
 }
