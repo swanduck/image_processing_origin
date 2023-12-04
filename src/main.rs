@@ -161,14 +161,14 @@ fn par_blur(img: &DynamicImage, par: i32) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
 fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let img = ImageReader::open("burger.png")?.decode()?;
     // let img_ = pixelate(&img, (20, 20));
-    // let _ = img_.save("pixelated.png");
+    // let _ = img_.save("images/pixel/pixelated.png");
 
 
     use std::time::Instant;
     let now = Instant::now();
     {
         let img_ = blur(&img, 40);
-        let _ = img_.save("blurred.png");    
+        let _ = img_.save("images/blur/blurred.png");    
     }
     let elapsed = now.elapsed();
 
@@ -176,7 +176,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let now2 = Instant::now();
     {
         let img_ = par_blur(&img, 40);
-        let _ = img_.save("par_blurred.png");    
+        // let _ = img_.save("images/blur/par_blurred.png");    
+        match img_.save("images/blur/par_blurred.png") {
+            Ok(_) => println!("Image saved successfully."),
+            Err(e) => println!("Failed to save image: {}", e),
+        }
+        
     }
     let elapsed2 = now2.elapsed();
     println!("seq: {:.2?}", elapsed);
@@ -184,7 +189,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     
     let speedup = elapsed.as_secs_f64() / elapsed2.as_secs_f64();
     println!("The parallel version is {:.2} times faster than the sequential version.", speedup);
-    
+
     Ok(())
 }
 
