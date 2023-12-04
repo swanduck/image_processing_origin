@@ -182,6 +182,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     println!("seq: {:.2?}", elapsed);
     println!("par: {:.2?}", elapsed2);
     
+    let speedup = elapsed.as_secs_f64() / elapsed2.as_secs_f64();
+    println!("The parallel version is {:.2} times faster than the sequential version.", speedup);
+    
     Ok(())
 }
 
