@@ -50,15 +50,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
 
     let now_invert = Instant::now();
     {
-        let img_ = invert_colors(&img);
+        let img_ = invert(&img);
         match img_.save("images/invert/inverted.png") {
             Ok(_) => println!("Image saved successfully."),
             Err(e) => println!("Failed to save image: {}", e),
         }
     }
     let elapsed_invert = now_invert.elapsed();
+
+
+
+    let now_parinvert = Instant::now();
+    {
+        let img_ = par_invert(&img);
+        match img_.save("images/invert/par_inverted.png") {
+            Ok(_) => println!("Image saved successfully."),
+            Err(e) => println!("Failed to save image: {}", e),
+        }
+    }
+    let elapsed_parinvert = now_parinvert.elapsed();
  
     println!("invert_seq: {:.2?}", elapsed_invert);
+    println!("invert_par: {:.2?}", elapsed_parinvert);
+    let invert_speedup = elapsed_invert.as_secs_f64() / elapsed_parinvert.as_secs_f64();
+    println!("par_invert is {:.2} times faster than the sequential version.", invert_speedup);
+
 
 
 
