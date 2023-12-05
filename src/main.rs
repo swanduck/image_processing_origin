@@ -94,7 +94,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
         }
     }
     let elapsed_sharpen = now_sharpen.elapsed();
+    
+        let now_parsharp = Instant::now();
+    {
+        let img_ = par_sharpen(&img);
+        match img_.save("images/grayscale/par_sharpened.png") {
+            Ok(_) => println!("Image saved successfully."),
+            Err(e) => println!("Failed to save image: {}", e),
+        }
+    }
+    let elapsed_parsharp = now_parsharp.elapsed();
+    
     println!("sharpen_seq: {:.2?}", elapsed_sharpen);
+    println!("sharpen_par: {:.2?}", elapsed_parsharp);
+
+
 
 
 
