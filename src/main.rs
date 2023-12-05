@@ -8,7 +8,7 @@ mod grayscale;
 use image::io::Reader as ImageReader;
 
 fn main() -> Result<(), Box<dyn std::error::Error>>  {
-    let img = ImageReader::open("wallpaper.png")?.decode()?;
+    let img = ImageReader::open("burger.png")?.decode()?;
     use std::time::Instant;
 
 
@@ -88,7 +88,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let now_sharpen = Instant::now();
     {
         let img_ = sharpen(&img);
-        match img_.save("images/sharpen/sharpened.png") {
+        match img_.save("images/sharpen/sharpened_burger.png") {
             Ok(_) => println!("Image saved successfully."),
             Err(e) => println!("Failed to save image: {}", e),
         }
@@ -98,15 +98,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
         let now_parsharp = Instant::now();
     {
         let img_ = par_sharpen(&img);
-        match img_.save("images/grayscale/par_sharpened.png") {
+        match img_.save("images/sharpen/par_sharpened_burger.png") {
             Ok(_) => println!("Image saved successfully."),
             Err(e) => println!("Failed to save image: {}", e),
         }
     }
     let elapsed_parsharp = now_parsharp.elapsed();
+    let sharpen_speedup = elapsed_sharpen.as_secs_f64()/elapsed_parsharp.as_secs_f64();
     
     println!("sharpen_seq: {:.2?}", elapsed_sharpen);
     println!("sharpen_par: {:.2?}", elapsed_parsharp);
+    println!("sharpen_par is {:.2} times faster than the sequential version.", sharpen_speedup);
+
+
+
 
 
 

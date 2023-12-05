@@ -90,5 +90,13 @@ pub fn par_sharpen(img: &DynamicImage) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
         }
     }
 
+    // output_img_buffer                // made it slower
+    // .enumerate_pixels_mut()
+    // .par_bridge()
+    // .for_each(|(x, y, pixel)| {
+    //     let row = &output_img[y as usize];
+    //     *pixel = row[x as usize];
+    // });
+
     output_img_buffer
 }
