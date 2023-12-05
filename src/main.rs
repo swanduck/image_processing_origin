@@ -1,6 +1,8 @@
 mod pixelate;
 mod blur;
 mod invert;
+mod sharpen;
+mod grayscale;
 
 
 use image::io::Reader as ImageReader;
@@ -46,37 +48,81 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     invert testing --------------------------------------------------
      */
 
-    use invert::*;
+    // use invert::*;
 
-    let now_invert = Instant::now();
-    {
-        let img_ = invert(&img);
-        match img_.save("images/invert/inverted.png") {
-            Ok(_) => println!("Image saved successfully."),
-            Err(e) => println!("Failed to save image: {}", e),
-        }
-    }
-    let elapsed_invert = now_invert.elapsed();
+    // let now_invert = Instant::now();
+    // {
+    //     let img_ = invert(&img);
+    //     match img_.save("images/invert/inverted.png") {
+    //         Ok(_) => println!("Image saved successfully."),
+    //         Err(e) => println!("Failed to save image: {}", e),
+    //     }
+    // }
+    // let elapsed_invert = now_invert.elapsed();
 
 
 
-    let now_parinvert = Instant::now();
-    {
-        let img_ = par_invert(&img);
-        match img_.save("images/invert/par_inverted.png") {
-            Ok(_) => println!("Image saved successfully."),
-            Err(e) => println!("Failed to save image: {}", e),
-        }
-    }
-    let elapsed_parinvert = now_parinvert.elapsed();
+    // let now_parinvert = Instant::now();
+    // {
+    //     let img_ = par_invert(&img);
+    //     match img_.save("images/invert/par_inverted.png") {
+    //         Ok(_) => println!("Image saved successfully."),
+    //         Err(e) => println!("Failed to save image: {}", e),
+    //     }
+    // }
+    // let elapsed_parinvert = now_parinvert.elapsed();
  
-    println!("invert_seq: {:.2?}", elapsed_invert);
-    println!("invert_par: {:.2?}", elapsed_parinvert);
-    let invert_speedup = elapsed_invert.as_secs_f64() / elapsed_parinvert.as_secs_f64();
-    println!("par_invert is {:.2} times faster than the sequential version.", invert_speedup);
+    // println!("invert_seq: {:.2?}", elapsed_invert);
+    // println!("invert_par: {:.2?}", elapsed_parinvert);
+    // let invert_speedup = elapsed_invert.as_secs_f64() / elapsed_parinvert.as_secs_f64();
+    // println!("par_invert is {:.2} times faster than the sequential version.", invert_speedup);
+
+
+    /*
+    sharpen testing --------------------------------------------------
+     */
+
+    // use sharpen::*;
+    // let now_sharpen = Instant::now();
+    // {
+    //     let img_ = sharpen(&img);
+    //     match img_.save("images/sharpen/sharpened.png") {
+    //         Ok(_) => println!("Image saved successfully."),
+    //         Err(e) => println!("Failed to save image: {}", e),
+    //     }
+    // }
+    // let elapsed_sharpen = now_sharpen.elapsed();
+    // println!("sharpen_seq: {:.2?}", elapsed_sharpen);
 
 
 
+    /*
+    grayscale testing --------------------------------------------------
+     */
+
+    use grayscale::*;
+    let now_gray = Instant::now();
+    {
+        let img_ = grayscale_ntsc(&img);
+        match img_.save("images/grayscale/grayscaled.png") {
+            Ok(_) => println!("Image saved successfully."),
+            Err(e) => println!("Failed to save image: {}", e),
+        }
+    }
+    let elapsed_gray = now_gray.elapsed();
+
+    let now_pargray = Instant::now();
+    {
+        let img_ = par_grayscale(&img);
+        match img_.save("images/grayscale/par_grayscaled.png") {
+            Ok(_) => println!("Image saved successfully."),
+            Err(e) => println!("Failed to save image: {}", e),
+        }
+    }
+    let elapsed_pargray = now_pargray.elapsed();
+
+    println!("grayscale_seq: {:.2?}", elapsed_gray);
+    println!("grayscale_par: {:.2?}", elapsed_pargray);
 
     Ok(())
 }
