@@ -7,6 +7,9 @@ mod contrast;
 
 
 use image::io::Reader as ImageReader;
+use std::time::Instant;
+use image::{DynamicImage, ImageBuffer, Rgba};
+
 
 fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let img = ImageReader::open("wallpaper.png")?.decode()?;
@@ -148,33 +151,54 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
 
 
     /*
-    sharpen testing --------------------------------------------------
+    contrast testing --------------------------------------------------
      */
 
     use contrast::*;
 
-    let now_contrast = Instant::now();
-    {
-        let img_ = increase_contrast(&img,2.0);
-        match img_.save("images/contrast/contrasted.png") {
-            Ok(_) => println!("Image saved successfully."),
-            Err(e) => println!("Failed to save image: {}", e),
-        }
-    }
-    let elapsed_contrast = now_contrast.elapsed();
+    process_and_save_image(&img, |img| increase_contrast(&img, 2.0), "images/contrast/contrastedtest.png");
 
-    let now_pcontrast = Instant::now();
-    {
-        let img_ = par_contrast(&img,2.0);
-        match img_.save("images/contrast/par_contrasted.png") {
-            Ok(_) => println!("Image saved successfully."),
-            Err(e) => println!("Failed to save image: {}", e),
-        }
-    }
-    let elapsed_pcontrast = now_pcontrast.elapsed();
 
-    println!("contrast_seq: {:.2?}", elapsed_contrast);
-    println!("contrast_par: {:.2?}", elapsed_pcontrast);
+    // let now_contrast = Instant::now();
+    // {
+    //     let img_ = increase_contrast(&img,2.0);
+    //     match img_.save("images/contrast/contrasted.png") {
+    //         Ok(_) => println!("Image saved successfully."),
+    //         Err(e) => println!("Failed to save image: {}", e),
+    //     }
+    // }
+    // let elapsed_contrast = now_contrast.elapsed();
+
+    // let now_pcontrast = Instant::now();
+    // {
+    //     let img_ = par_contrast(&img,2.0);
+    //     match img_.save("images/contrast/par_contrasted.png") {
+    //         Ok(_) => println!("Image saved successfully."),
+    //         Err(e) => println!("Failed to save image: {}", e),
+    //     }
+    // }
+    // let elapsed_pcontrast = now_pcontrast.elapsed();
+
+    // println!("contrast_seq: {:.2?}", elapsed_contrast);
+    // println!("contrast_par: {:.2?}", elapsed_pcontrast);
 
     Ok(())
+}
+
+
+
+fn process_and_save_image<F>(img: &DynamicImage, operation: F, save_location: &str) 
+where
+    F: Fn(&DynamicImage) -> ImageBuffer<Rgba<u8>, Vec<u8>>,
+{
+    let now = Instant::now();
+    {
+        let img_ = operation(img);
+        match img_.save(save_location) {
+            Ok(_) => println!("Image saved successfully."),
+            Err(e) => println!("Failed to save image: {}", e),
+        }
+    }
+    let elapsed = now.elapsed();
+    println!("Time elapsed in processing and saving the image is: {:?}", elapsed);
 }
