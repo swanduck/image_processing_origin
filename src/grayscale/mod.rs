@@ -1,5 +1,6 @@
 use image::{GenericImageView, DynamicImage, ImageBuffer, Rgba};
 use rayon::prelude::*;
+#[allow(dead_code)]
 
 pub fn grayscale_ntsc(img: &DynamicImage) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
     let (width, height) = img.dimensions();
@@ -44,7 +45,7 @@ pub fn grayscale_ntsc(img: &DynamicImage) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
 
 
 
-
+#[allow(dead_code)]
 pub fn par_grayscale(img: &DynamicImage) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
     let mut output_img = img.clone().to_rgba8();
 
