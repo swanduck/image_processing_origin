@@ -156,7 +156,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
 
     use contrast::*;
 
-    process_and_save_image(&img, |img| increase_contrast(&img, 2.0), "images/contrast/contrastedtest.png");
+    process_and_save_image(&img, |img| increase_contrast(&img, 2.0), "images/contrast/contrasted.png");
 
 
     // let now_contrast = Instant::now();
